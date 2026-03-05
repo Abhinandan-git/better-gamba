@@ -1,5 +1,6 @@
 package com.abhinandan.bettergamba;
 
+import com.abhinandan.bettergamba.registry.ModBlocks;
 import com.abhinandan.bettergamba.registry.ModItems;
 import net.neoforged.bus.api.IEventBus;
 
@@ -15,5 +16,6 @@ public class BetterGamba {
 
     public BetterGamba(IEventBus modEventBus) {
         ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
     }
 }

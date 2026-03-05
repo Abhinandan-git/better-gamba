@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "bettergamba:block/lottery_machine",
+      "y": 0
+    },
+    "facing=south": {
+      "model": "bettergamba:block/lottery_machine",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "bettergamba:block/lottery_machine",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "bettergamba:block/lottery_machine",
+      "y": 270
+    }
+  }
+}
