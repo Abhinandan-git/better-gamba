@@ -1,0 +1,35 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="BUSL-1.1"
+
+[[mods]]
+modId="bettergamba"
+version="${mod_version}"
+displayName="Better Gamba"
+description='''
+A lottery machine mod for NeoForge 1.21.1.
+Insert coins, spin the wheel, win configurable rewards.
+Reward pools are set by the modpack administrator via TOML config.
+'''
+
+[[dependencies.bettergamba]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.bettergamba]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1,1.22)"
+    ordering="NONE"
+    side="BOTH"
+
+# JEI — soft dependency (optional). Mod works without it.
+[[dependencies.bettergamba]]
+    modId="jei"
+    type="optional"
+    versionRange="[*,)"
+    ordering="NONE"
+    side="CLIENT"
