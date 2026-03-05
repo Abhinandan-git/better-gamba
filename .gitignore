@@ -1,0 +1,23 @@
+# Build outputs
+build/
+out/
+.gradle/
+
+# IntelliJ IDEA — commit .idea/modules.xml and .idea/*.iml but not everything
+.idea/
+*.iml
+
+# NeoForge run directories (generated at runtime)
+run/
+runs/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Credentials — never commit these
+local.properties
+*.env
+
+# NeoForge caches
+.cache/
