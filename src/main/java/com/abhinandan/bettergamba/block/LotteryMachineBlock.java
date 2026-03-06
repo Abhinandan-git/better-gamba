@@ -1,5 +1,6 @@
 package com.abhinandan.bettergamba.block;
 
+import com.abhinandan.bettergamba.block.entity.LotteryMachineBlockEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,10 +40,12 @@ public class LotteryMachineBlock extends BaseEntityBlock {
      * Used by hopper capability to resolve left/right sides relative to the player.
      */
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
     /**
      * CODEC serialize and deserialize the block state.
      */
     public static final MapCodec<LotteryMachineBlock> CODEC = simpleCodec(LotteryMachineBlock::new);
+
     /**
      * The collision/visual shape of the block.
      * Extends from y=0 to y=2 (2 full block heights) within the 16x16 XZ footprint.
@@ -60,7 +63,13 @@ public class LotteryMachineBlock extends BaseEntityBlock {
     }
 
     // -- Shape (ADR-01) ------------------------------------------------
-    public static VoxelShape getSHAPE(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override
+    public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         return SHAPE;
     }
 
@@ -79,11 +88,6 @@ public class LotteryMachineBlock extends BaseEntityBlock {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    @Override
-    protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
-        return SHAPE;
-    }
-
     // -- Interaction ---------------------------------------------------
 
     /**
@@ -95,10 +99,10 @@ public class LotteryMachineBlock extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity blockEntity = level.getBlockEntity(pos);
 
-            // if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
-            //     // TODO [Phase 3 Step 26]: open menu here once LotteryMachineMenu exists
-            //     // player.openMenu(lotteryMachineBlockEntity, pos);
-            // }
+            if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
+                // TODO [Phase 3 Step 26]: open menu here once LotteryMachineMenu exists
+                // player.openMenu(lotteryMachineBlockEntity, pos);
+            }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());
     }
@@ -111,13 +115,21 @@ public class LotteryMachineBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
-    // @Override
-    // public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState) {
-    //     return new LotteryMachineBlockEntity(blockPos, blockState);
-    // }
     @Override
     public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState) {
-        return null;
+        return new LotteryMachineBlockEntity(blockPos, blockState);
+    }
+
+    @Override
+    public @NotNull BlockState playerWillDestroy(Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
+        if (!level.isClientSide()) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
+                lotteryMachineBlockEntity.dropContents();
+            }
+        }
+        super.playerWillDestroy(level, pos, state, player);
+        return state;
     }
 
     @Override
