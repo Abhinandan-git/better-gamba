@@ -4,6 +4,7 @@ import com.abhinandan.bettergamba.block.entity.CapabilityHandler;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import com.abhinandan.bettergamba.registry.ModBlocks;
 import com.abhinandan.bettergamba.registry.ModItems;
+import com.abhinandan.bettergamba.registry.ModMenuTypes;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -22,6 +23,7 @@ public class BetterGamba {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
         modEventBus.addListener(CapabilityHandler::register);
     }
 }

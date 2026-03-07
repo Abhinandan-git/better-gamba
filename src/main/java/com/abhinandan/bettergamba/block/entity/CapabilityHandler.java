@@ -36,7 +36,7 @@ public class CapabilityHandler {
             Direction rightSide = facing.getClockWise();
             Direction leftSide = facing.getCounterClockWise();
 
-            if (direction == rightSide && direction == leftSide) {
+            if (direction == rightSide || direction == leftSide) {
                 // Hopper on left or right side: insert coins only
                 return new LotteryMachineCoinHandler(blockEntity, true, false);
             }

@@ -64,12 +64,12 @@ public class LotteryMachineBlock extends BaseEntityBlock {
 
     // -- Shape (ADR-01) ------------------------------------------------
     @Override
-    public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+    public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos position, @NotNull CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+    protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos position, @NotNull CollisionContext context) {
         return SHAPE;
     }
 
@@ -95,13 +95,12 @@ public class LotteryMachineBlock extends BaseEntityBlock {
      * Server-side only — client sends a useItem packet, server opens the menu.
      */
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos position, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         if (!level.isClientSide()) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
+            BlockEntity blockEntity = level.getBlockEntity(position);
 
             if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
-                // TODO [Phase 3 Step 26]: open menu here once LotteryMachineMenu exists
-                // player.openMenu(lotteryMachineBlockEntity, pos);
+                player.openMenu(lotteryMachineBlockEntity, buf -> buf.writeBlockPos(position));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());
@@ -121,14 +120,14 @@ public class LotteryMachineBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @NotNull BlockState playerWillDestroy(Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
+    public @NotNull BlockState playerWillDestroy(Level level, @NotNull BlockPos position, @NotNull BlockState state, @NotNull Player player) {
         if (!level.isClientSide()) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
+            BlockEntity blockEntity = level.getBlockEntity(position);
             if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
                 lotteryMachineBlockEntity.dropContents();
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, position, state, player);
         return state;
     }
 
