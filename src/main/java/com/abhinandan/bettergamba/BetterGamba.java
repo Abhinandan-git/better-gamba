@@ -1,5 +1,6 @@
 package com.abhinandan.bettergamba;
 
+import com.abhinandan.bettergamba.block.entity.CapabilityHandler;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import com.abhinandan.bettergamba.registry.ModBlocks;
 import com.abhinandan.bettergamba.registry.ModItems;
@@ -21,5 +22,6 @@ public class BetterGamba {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        modEventBus.addListener(CapabilityHandler::register);
     }
 }
