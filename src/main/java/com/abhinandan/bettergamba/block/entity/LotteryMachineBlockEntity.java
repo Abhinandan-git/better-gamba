@@ -1,15 +1,22 @@
 package com.abhinandan.bettergamba.block.entity;
 
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
+import com.abhinandan.bettergamba.screen.menu.LotteryMachineMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * BlockEntity for the Lottery Machine.
@@ -18,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
  * NBT save/load ensures coins persist across chunk unloads and server restarts.
  * Thread-safe spin queue will be added in Phase 4 (ADR-03).
  */
-public class LotteryMachineBlockEntity extends BlockEntity {
+public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvider {
     /**
      * The coin slot inventory.
      * SLOT_COUNT = 1: a single slot holds the coins awaiting a spin.
@@ -30,7 +37,7 @@ public class LotteryMachineBlockEntity extends BlockEntity {
      * NBT key for the coin inventory. Must not be changed after any world save data.
      */
     private static final String NBT_INVENTORY = "inventory";
-    final ItemStackHandler coinInventory = new ItemStackHandler(SLOT_COUNT) {
+    public final ItemStackHandler coinInventory = new ItemStackHandler(SLOT_COUNT) {
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
@@ -66,7 +73,17 @@ public class LotteryMachineBlockEntity extends BlockEntity {
         }
 
         SimpleContainer inventory = new SimpleContainer(SLOT_COUNT);
-        inventory.setItem(COIN_SLOT, coinInventory.getStackInSlot(SLOT_COUNT));
+        inventory.setItem(COIN_SLOT, coinInventory.getStackInSlot(COIN_SLOT));
         Containers.dropContents(level, worldPosition, inventory);
+    }
+
+    @Override
+    public @NotNull Component getDisplayName() {
+        return Component.translatable("block.bettergamba.lottery_machine");
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
+        return new LotteryMachineMenu(containerId, inventory, this);
     }
 }
