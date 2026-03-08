@@ -1,9 +1,12 @@
 package com.abhinandan.bettergamba.block.entity;
 
+import com.abhinandan.bettergamba.BetterGamba;
+import com.abhinandan.bettergamba.logic.LotteryLogic;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import com.abhinandan.bettergamba.screen.menu.LotteryMachineMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
@@ -12,6 +15,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -41,6 +45,17 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         @Override
         protected void onContentsChanged(int slot) {
             setChanged();
+        }
+
+        /**
+         * Restricts the coin slot to bettergamba:celestia_coin only.
+         * Rejects all other items — they cannot be inserted via GUI or hopper.
+         * Requirement: ITM-04, BLK-04.
+         */
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            String registryId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            return LotteryLogic.isCelestiaCoin(registryId, BetterGamba.MOD_ID);
         }
     };
 
