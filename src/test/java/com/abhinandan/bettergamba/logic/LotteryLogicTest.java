@@ -179,19 +179,16 @@ class LotteryLogicTest {
     }
 
     @Test
-    @DisplayName("[EDGE] Block does not accept redstone as a spin trigger")
-    void redstoneInputDoesNotTriggerSpin() {
-        // Requirement: BLK-11 REJECTED — no redstone input.
-        // The block only emits redstone output (strength 1 during spin).
-        // This test verifies there is no isTriggerableByRedstone() method
-        // or similar on LotteryLogic.
-        //
-        // If this test compiles and passes, no redstone input API exists.
-        // Any future developer adding redstone input would need to update this
-        // test explicitly — making the architectural decision visible.
+    @DisplayName("[EDGE] Redstone input triggers spin — LotteryLogic is agnostic to trigger source")
+    void lotteryLogicIsAgnosticToTriggerSource() {
+        // LotteryLogic does not know or care whether the spin was triggered
+        // by a player button click or a redstone signal — both call requestSpin()
+        // on the BlockEntity which calls LotteryLogic.spin().
+        // This test verifies LotteryLogic has no trigger-source-specific methods,
+        // keeping the trigger routing responsibility in the BlockEntity where it belongs.
         var methods = Arrays.stream(LotteryLogic.class.getDeclaredMethods()).map(java.lang.reflect.Method::getName).toList();
 
-        assertFalse(methods.stream().anyMatch(m -> m.toLowerCase().contains("redstone")), "LotteryLogic must not contain any redstone input methods (BLK-11 REJECTED)");
+        assertFalse(methods.stream().anyMatch(m -> m.toLowerCase().contains("player") || m.toLowerCase().contains("redstone")), "LotteryLogic must be trigger-agnostic — routing belongs in BlockEntity");
     }
 
     @Test

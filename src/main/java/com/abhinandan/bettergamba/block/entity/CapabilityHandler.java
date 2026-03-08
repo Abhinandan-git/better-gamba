@@ -3,6 +3,7 @@ package com.abhinandan.bettergamba.block.entity;
 import com.abhinandan.bettergamba.block.LotteryMachineBlock;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -42,7 +43,27 @@ public class CapabilityHandler {
             }
             if (direction == Direction.DOWN) {
                 // Hopper on bottom: extract rewards only (Phase 4 fills this)
-                return new LotteryMachineCoinHandler(blockEntity, false, true);
+                return new LotteryMachineCoinHandler(blockEntity, false, true) {
+                    @Override
+                    public @NotNull ItemStack getStackInSlot(int slot) {
+                        return blockEntity.rewardInventory.getStackInSlot(slot);
+                    }
+
+                    @Override
+                    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+                        return blockEntity.rewardInventory.extractItem(slot, amount, simulate);
+                    }
+
+                    @Override
+                    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+                        return stack; // insertion always rejected on bottom face
+                    }
+
+                    @Override
+                    public int getSlotLimit(int slot) {
+                        return blockEntity.rewardInventory.getSlotLimit(slot);
+                    }
+                };
             }
             // Front, back, top: no capability
             return null;

@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,10 +52,12 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
      */
     public static final int SLOT_COUNT = 1;
     public static final int COIN_SLOT = 0;
+    public static final int REWARD_SLOT = 0;
     /**
      * NBT key for the coin inventory. Must not blockEntity changed after any world save data.
      */
     private static final String NBT_INVENTORY = "inventory";
+    private static final String NBT_REWARD = "reward";
     private static final Logger LOGGER = LogManager.getLogger(BetterGamba.MOD_ID);
     public final ItemStackHandler coinInventory = new ItemStackHandler(SLOT_COUNT) {
         @Override
@@ -72,6 +76,13 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
             return LotteryLogic.isCelestiaCoin(registryId, BetterGamba.MOD_ID);
         }
     };
+    public final ItemStackHandler rewardInventory = new ItemStackHandler(SLOT_COUNT) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+    };
+
     private final Random random = new Random();
     /**
      * True while a spin is currently resolving. Shared across all players.
@@ -86,58 +97,24 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         super(ModBlockEntities.LOTTERY_MACHINE_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put(NBT_INVENTORY, coinInventory.serializeNBT(registries));
-    }
-
-    @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains(NBT_INVENTORY)) {
-            coinInventory.deserializeNBT(registries, tag.getCompound(NBT_INVENTORY));
-        }
-    }
-
-    /**
-     * Drops all coins held in the inventory at the block's position.
-     * Called by LotteryMachineBlock when the block is destroyed.
-     * Uses Containers.dropContents — identical pattern to Chest and Furnace.
-     */
-    public void dropContents() {
-        if (level == null) {
+    public static void tick(@NotNull Level level, BlockPos pos, BlockState state, LotteryMachineBlockEntity blockEntity) {
+        if (level.isClientSide()) {
             return;
         }
 
-        SimpleContainer inventory = new SimpleContainer(SLOT_COUNT);
-        inventory.setItem(COIN_SLOT, coinInventory.getStackInSlot(COIN_SLOT));
-        Containers.dropContents(level, worldPosition, inventory);
-    }
-
-    @Override
-    public @NotNull Component getDisplayName() {
-        return Component.translatable("block.bettergamba.lottery_machine");
-    }
-
-    @Override
-    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
-        return new LotteryMachineMenu(containerId, inventory, this);
-    }
-
-    public static void tick(@NotNull Level level, BlockPos pos, BlockState state, LotteryMachineBlockEntity blockEntity) {
-        if (level.isClientSide()) return;
+        drainRewardOutput(level, pos, blockEntity);
 
         if (blockEntity.spinTicksRemaining > 0) {
             blockEntity.spinTicksRemaining--;
             if (blockEntity.spinTicksRemaining == 0) {
                 blockEntity.spinning = false;
-                level.updateNeighborsAt(pos, state.getBlock());
             }
             return;
         }
 
-        if (!blockEntity.spinning) return;
+        if (!blockEntity.spinning) {
+            return;
+        }
 
         RewardPool pool = RewardPool.fromConfig(BetterGambaConfig.INSTANCE);
         SpinResult result = LotteryLogic.spin(pool, blockEntity.random);
@@ -159,6 +136,67 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         level.updateNeighborsAt(pos, state.getBlock());
     }
 
+    private static void drainRewardOutput(Level level, BlockPos pos, @NotNull LotteryMachineBlockEntity blockEntity) {
+        ItemStack reward = blockEntity.rewardInventory.getStackInSlot(REWARD_SLOT);
+        if (reward.isEmpty()) {
+            return;
+        }
+
+        // Try bottom hopper first (BLK-05b)
+        var belowHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.below(), null);
+        if (belowHandler == null) {
+            belowHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.below(), Direction.UP);
+        }
+
+        LOGGER.info("[BetterGamba] drainRewardOutput: belowHandler={}, rewardStack={}", belowHandler, reward);
+
+        if (belowHandler != null) {
+            ItemStack remainder = ItemHandlerHelper.insertItemStacked(belowHandler, reward.copy(), false);
+            // Extract exactly how much was consumed
+            int consumed = reward.getCount() - remainder.getCount();
+            if (consumed > 0) {
+                blockEntity.rewardInventory.extractItem(REWARD_SLOT, consumed, false);
+                reward = blockEntity.rewardInventory.getStackInSlot(REWARD_SLOT);
+            }
+            if (reward.isEmpty()) {
+                return;
+            }
+        }
+
+        // No hopper or hopper full — drop remainder in world
+        blockEntity.rewardInventory.extractItem(REWARD_SLOT, reward.getCount(), false);
+        ItemEntity itemEntity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, reward);
+        level.addFreshEntity(itemEntity);
+    }
+
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.put(NBT_INVENTORY, coinInventory.serializeNBT(registries));
+        tag.put(NBT_REWARD, rewardInventory.serializeNBT(registries));
+    }
+
+    @Override
+    public @NotNull Component getDisplayName() {
+        return Component.translatable("block.bettergamba.lottery_machine");
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory, @NotNull Player player) {
+        return new LotteryMachineMenu(containerId, inventory, this);
+    }
+
+    @Override
+    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.loadAdditional(tag, registries);
+        if (tag.contains(NBT_INVENTORY)) {
+            coinInventory.deserializeNBT(registries, tag.getCompound(NBT_INVENTORY));
+        }
+        if (tag.contains(NBT_REWARD)) {
+            rewardInventory.deserializeNBT(registries, tag.getCompound(NBT_REWARD));
+        }
+    }
+
     /**
      * Called when any player clicks the Spin button.
      * If a spin is already in progress, the request is ignored — the button
@@ -178,32 +216,19 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
     }
 
     /**
-     * Delivers the reward item — either into a bottom hopper or as a world drop.
-     * (OQ-10, BLK-05b)
-     *
-     * @param result The resolved spin result
-     * @param pos    The block's world position
-     * @param level  The server level
+     * Drops all coins held in the inventory at the block's position.
+     * Called by LotteryMachineBlock when the block is destroyed.
+     * Uses Containers.dropContents — identical pattern to Chest and Furnace.
      */
-    private void deliverReward(@NotNull SpinResult result, BlockPos pos, net.minecraft.world.level.Level level) {
-        ItemStack reward = buildItemStack(result.itemEntry());
-        if (reward.isEmpty()) return;
-
-        // Check for a hopper on the bottom face first (BLK-05b)
-        BlockPos belowPos = pos.below();
-        var belowHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, belowPos, Direction.UP);
-
-        if (belowHandler != null) {
-            // Try to insert into the hopper below
-            ItemStack remainder = net.neoforged.neoforge.items.ItemHandlerHelper.insertItemStacked(belowHandler, reward, false);
-            if (remainder.isEmpty()) return; // fully inserted
-            // Partial insert — drop the remainder in the world
-            reward = remainder;
+    public void dropContents() {
+        if (level == null) {
+            return;
         }
 
-        // Drop at block position (OQ-10)
-        net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, reward);
-        level.addFreshEntity(itemEntity);
+        SimpleContainer inventory = new SimpleContainer(2);
+        inventory.setItem(0, coinInventory.getStackInSlot(COIN_SLOT));
+        inventory.setItem(1, rewardInventory.getStackInSlot(REWARD_SLOT));
+        Containers.dropContents(level, worldPosition, inventory);
     }
 
     /**
@@ -224,10 +249,26 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
     }
 
     /**
-     * Returns the redstone signal strength.
-     * Emits strength 1 while a spin is active, 0 otherwise (RWD-06, BLK-06).
+     * Delivers the reward item — either into a bottom hopper or as a world drop.
+     * (OQ-10, BLK-05b)
+     *
+     * @param result The resolved spin result
+     * @param pos    The block's world position
+     * @param level  The server level
      */
-    public int getSignal() {
-        return spinTicksRemaining > 0 ? 1 : 0;
+    private void deliverReward(@NotNull SpinResult result, BlockPos pos, Level level) {
+        ItemStack reward = buildItemStack(result.itemEntry());
+        if (reward.isEmpty()) {
+            return;
+        }
+
+        // Try inserting into rewardInventory slot first
+        ItemStack remainder = rewardInventory.insertItem(REWARD_SLOT, reward, false);
+
+        // If rewardInventory is full, drop directly in the world as fallback
+        if (!remainder.isEmpty()) {
+            ItemEntity itemEntity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, remainder);
+            level.addFreshEntity(itemEntity);
+        }
     }
 }
