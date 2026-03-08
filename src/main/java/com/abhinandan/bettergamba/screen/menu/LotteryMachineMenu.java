@@ -34,7 +34,7 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
      * Client-side constructor — called when the client receives the open-menu packet.
      * Reads block position from the extra data buffer to find the BlockEntity.
      */
-    public LotteryMachineMenu(int containerId, Inventory playerInventory, FriendlyByteBuf extraData) {
+    public LotteryMachineMenu(int containerId, @NotNull Inventory playerInventory, @NotNull FriendlyByteBuf extraData) {
         super(ModMenuTypes.LOTTERY_MACHINE_MENU.get(), containerId);
         BlockPos position = extraData.readBlockPos();
         BlockEntity be = playerInventory.player.level().getBlockEntity(position);
@@ -103,5 +103,9 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
     public boolean stillValid(@NotNull Player player) {
         assert blockEntity.getLevel() != null;
         return AbstractContainerMenu.stillValid(ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos()), player, ModBlocks.LOTTERY_MACHINE.get());
+    }
+
+    public BlockPos getBlockPos() {
+        return blockEntity.getBlockPos();
     }
 }

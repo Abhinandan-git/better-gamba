@@ -1,12 +1,15 @@
 package com.abhinandan.bettergamba.screen;
 
 import com.abhinandan.bettergamba.BetterGamba;
+import com.abhinandan.bettergamba.network.SpinRequestPacket;
 import com.abhinandan.bettergamba.screen.menu.LotteryMachineMenu;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,6 +28,16 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
         super(menu, playerInventory, title);
         this.imageWidth = 176;  // standard GUI width
         this.imageHeight = 166;  // standard GUI height
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        int x = (width - imageWidth) / 2;
+        int y = (height - imageHeight) / 2;
+
+        // Spin button — centred below the coin slot
+        addRenderableWidget(Button.builder(net.minecraft.network.chat.Component.literal("Spin"), btn -> PacketDistributor.sendToServer(new SpinRequestPacket(menu.getBlockPos()))).bounds(x + 63, y + 55, 50, 20).build());
     }
 
     @Override

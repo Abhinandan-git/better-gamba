@@ -149,17 +149,31 @@ public class LotteryMachineBlock extends BaseEntityBlock {
         return createTickerHelper(type, ModBlockEntities.LOTTERY_MACHINE_BLOCK_ENTITY.get(), LotteryMachineBlockEntity::tick);
     }
 
+    /**
+     * Declares that this block can receive redstone signals.
+     * Required for canConnectRedstone and neighbourChanged to fire correctly.
+     */
     @Override
-    public boolean isSignalSource(@NotNull BlockState state) {
+    public boolean canConnectRedstone(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @Nullable Direction direction) {
         return true;
     }
 
+    /**
+     * Called when a neighboring block changes — checks for redstone signal.
+     * If the block receives power and is not already spinning, triggers a spin.
+     * This allows automation without a player present (new requirement).
+     */
     @Override
-    public int getSignal(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull Direction direction) {
+    public void neighborChanged(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Block changedBlock, @NotNull BlockPos changedPos, boolean isMoving) {
+        super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
+        if (level.isClientSide()) return;
+
+        boolean isPowered = level.hasNeighborSignal(pos);
+        if (!isPowered) return;
+
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
-            return lotteryMachineBlockEntity.getSignal();
+        if (be instanceof LotteryMachineBlockEntity lmbe) {
+            lmbe.requestSpin();
         }
-        return 0;
     }
 }
