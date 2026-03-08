@@ -98,24 +98,21 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
     }
 
     public static void tick(@NotNull Level level, BlockPos pos, BlockState state, LotteryMachineBlockEntity blockEntity) {
-        if (level.isClientSide()) {
-            return;
-        }
+        if (level.isClientSide()) return;
 
+        // Drain reward output every tick regardless of spin state
         drainRewardOutput(level, pos, blockEntity);
 
+        // No active spin — nothing to do
+        if (!blockEntity.spinning) return;
+
+        // Spin timer is counting down — wait
         if (blockEntity.spinTicksRemaining > 0) {
             blockEntity.spinTicksRemaining--;
-            if (blockEntity.spinTicksRemaining == 0) {
-                blockEntity.spinning = false;
-            }
             return;
         }
 
-        if (!blockEntity.spinning) {
-            return;
-        }
-
+        // Timer has reached zero — now resolve the spin and deliver the reward
         RewardPool pool = RewardPool.fromConfig(BetterGambaConfig.INSTANCE);
         SpinResult result = LotteryLogic.spin(pool, blockEntity.random);
 
@@ -131,9 +128,9 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
             LOGGER.info("[BetterGamba] Spin at {} — Tier: {}, Item: {}", pos, result.tierName(), result.itemEntry().registryId());
         }
 
-        int spinMs = BetterGambaConfig.INSTANCE.spinDurationMs.get();
-        blockEntity.spinTicksRemaining = Math.max(1, spinMs / 50);
-        level.updateNeighborsAt(pos, state.getBlock());
+        // Spin is complete
+        blockEntity.spinning = false;
+        blockEntity.setChanged();
     }
 
     private static void drainRewardOutput(Level level, BlockPos pos, @NotNull LotteryMachineBlockEntity blockEntity) {
@@ -203,7 +200,9 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
      * should blockEntity visually disabled on the client during this time (Phase 5).
      */
     public void requestSpin() {
-        if (spinning) return;
+        if (spinning) {
+            return;
+        }
 
         int coinCost = BetterGambaConfig.INSTANCE.coinCostPerSpin.get();
         ItemStack coinsInSlot = coinInventory.getStackInSlot(COIN_SLOT);
@@ -211,6 +210,11 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) return;
 
         coinInventory.extractItem(COIN_SLOT, coinCost, false);
+
+        // Set timer HERE so the spin waits before resolving
+        int spinMs = BetterGambaConfig.INSTANCE.spinDurationMs.get();
+        spinTicksRemaining = Math.max(1, spinMs / 50);
+
         spinning = true;
         setChanged();
     }
@@ -244,7 +248,7 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         }
         var item = BuiltInRegistries.ITEM.get(loc);
         var stack = new ItemStack(item);
-        // NBT application will be added in Phase 5 when NBT parsing is implemented
+        // NBT application will blockEntity added in Phase 5 when NBT parsing is implemented
         return stack;
     }
 
