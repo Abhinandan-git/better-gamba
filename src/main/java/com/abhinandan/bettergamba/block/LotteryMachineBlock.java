@@ -1,6 +1,7 @@
 package com.abhinandan.bettergamba.block;
 
 import com.abhinandan.bettergamba.block.entity.LotteryMachineBlockEntity;
+import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,6 +14,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -134,5 +137,29 @@ public class LotteryMachineBlock extends BaseEntityBlock {
     @Override
     protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
+    }
+
+    /**
+     * Registers the server-side tick method for the BlockEntity.
+     * Client-side ticking is not needed — no world-space animation in v1.
+     */
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
+        if (level.isClientSide()) return null;
+        return createTickerHelper(type, ModBlockEntities.LOTTERY_MACHINE_BLOCK_ENTITY.get(), LotteryMachineBlockEntity::tick);
+    }
+
+    @Override
+    public boolean isSignalSource(@NotNull BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getSignal(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull Direction direction) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
+            return lotteryMachineBlockEntity.getSignal();
+        }
+        return 0;
     }
 }
