@@ -140,12 +140,12 @@ class LotteryLogicTest {
     @Test
     @DisplayName("[EDGE] Empty item list in a tier — tier is not selectable")
     void emptyItemListTierIsNotSelectable() {
-        // Requirement: a tier with no items must be skipped even if weight > 0
+        // Requirement: a tier with no items must blockEntity skipped even if weight > 0
         RarityTier emptyTier = new RarityTier("Common", 100, List.of());
         RewardPool p = pool(emptyTier, tier("Omega", 1, "minecraft:nether_star"));
 
-        // Empty tier must not be selectable
-        assertFalse(emptyTier.isSelectable(), "Tier with empty item list must not be selectable");
+        // Empty tier must not blockEntity selectable
+        assertFalse(emptyTier.isSelectable(), "Tier with empty item list must not blockEntity selectable");
 
         // Omega must always win since Common is not selectable
         for (int seed = 0; seed < 50; seed++) {
@@ -175,7 +175,7 @@ class LotteryLogicTest {
         // LotteryLogic itself is stateless — this guard lives in the BlockEntity.
         // Test verifies that LotteryLogic.spin() is pure and has no 'isSpinning' state.
         var methods = Arrays.stream(LotteryLogic.class.getDeclaredMethods()).map(java.lang.reflect.Method::getName).toList();
-        assertFalse(methods.stream().anyMatch(m -> m.contains("spinning") || m.contains("active")), "LotteryLogic must be stateless — spin state belongs in the BlockEntity");
+        assertFalse(methods.stream().anyMatch(m -> m.contains("spinning") || m.contains("active")), "LotteryLogic must blockEntity stateless — spin state belongs in the BlockEntity");
     }
 
     @Test
@@ -188,7 +188,7 @@ class LotteryLogicTest {
         // keeping the trigger routing responsibility in the BlockEntity where it belongs.
         var methods = Arrays.stream(LotteryLogic.class.getDeclaredMethods()).map(java.lang.reflect.Method::getName).toList();
 
-        assertFalse(methods.stream().anyMatch(m -> m.toLowerCase().contains("player") || m.toLowerCase().contains("redstone")), "LotteryLogic must be trigger-agnostic — routing belongs in BlockEntity");
+        assertFalse(methods.stream().anyMatch(m -> m.toLowerCase().contains("player") || m.toLowerCase().contains("redstone")), "LotteryLogic must blockEntity trigger-agnostic — routing belongs in BlockEntity");
     }
 
     @Test
@@ -197,11 +197,11 @@ class LotteryLogicTest {
         // Requirement: ITM-04, BLK-04 — only bettergamba:celestia_coin is valid
         String modId = "bettergamba";
 
-        assertTrue(LotteryLogic.isCelestiaCoin("bettergamba:celestia_coin", modId), "celestia_coin must be accepted");
-        assertFalse(LotteryLogic.isCelestiaCoin("minecraft:gold_ingot", modId), "gold_ingot must be rejected");
-        assertFalse(LotteryLogic.isCelestiaCoin("minecraft:coin", modId), "minecraft:coin must be rejected");
-        assertFalse(LotteryLogic.isCelestiaCoin("", modId), "Empty string must be rejected");
-        assertFalse(LotteryLogic.isCelestiaCoin("bettergamba:celestia_coin_fake", modId), "Similar but wrong ID must be rejected");
+        assertTrue(LotteryLogic.isCelestiaCoin("bettergamba:celestia_coin", modId), "celestia_coin must blockEntity accepted");
+        assertFalse(LotteryLogic.isCelestiaCoin("minecraft:gold_ingot", modId), "gold_ingot must blockEntity rejected");
+        assertFalse(LotteryLogic.isCelestiaCoin("minecraft:coin", modId), "minecraft:coin must blockEntity rejected");
+        assertFalse(LotteryLogic.isCelestiaCoin("", modId), "Empty string must blockEntity rejected");
+        assertFalse(LotteryLogic.isCelestiaCoin("bettergamba:celestia_coin_fake", modId), "Similar but wrong ID must blockEntity rejected");
     }
 
     // ── [EDGE] ItemEntry validation ───────────────────────────────

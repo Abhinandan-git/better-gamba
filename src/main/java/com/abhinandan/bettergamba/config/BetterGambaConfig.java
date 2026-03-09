@@ -72,7 +72,7 @@ public class BetterGambaConfig {
         builder.pop();
 
         builder.comment("Reward Pool — Common tier").push("common");
-        commonWeight = builder.comment("Relative weight. Higher = more frequent. Must be >= 0.").defineInRange("weight", 100, 0, Integer.MAX_VALUE);
+        commonWeight = builder.comment("Relative weight. Higher = more frequent. Must blockEntity >= 0.").defineInRange("weight", 100, 0, Integer.MAX_VALUE);
         commonItems = builder.comment("Item list. Format: \"namespace:path\" or \"namespace:path|{nbt}\"").defineListAllowEmpty("items", List.of("minecraft:bread", "minecraft:apple"), BetterGambaConfig::isValidItemEntry);
         builder.pop();
 

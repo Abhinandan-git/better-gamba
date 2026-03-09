@@ -6,15 +6,22 @@ import com.abhinandan.bettergamba.logic.LotteryLogic;
 import com.abhinandan.bettergamba.logic.model.ItemEntry;
 import com.abhinandan.bettergamba.logic.model.RewardPool;
 import com.abhinandan.bettergamba.logic.model.SpinResult;
+import com.abhinandan.bettergamba.network.SpinResultPacket;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
+import com.abhinandan.bettergamba.registry.ModSounds;
 import com.abhinandan.bettergamba.screen.menu.LotteryMachineMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
@@ -23,17 +30,18 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Random;
 
@@ -104,13 +112,30 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         drainRewardOutput(level, pos, blockEntity);
 
         // No active spin — nothing to do
-        if (!blockEntity.spinning) return;
+        if (!blockEntity.spinning) {
+            return;
+        }
 
         // Spin timer is counting down — wait
         if (blockEntity.spinTicksRemaining > 0) {
             blockEntity.spinTicksRemaining--;
             return;
         }
+
+        // Timer has reached zero — now resolve the spin and deliver the reward
+        int coinCost = BetterGambaConfig.INSTANCE.coinCostPerSpin.get();
+        ItemStack coinsInSlot = blockEntity.coinInventory.getStackInSlot(COIN_SLOT);
+
+        // Re-validate coins are still present — player may have removed them during spin
+        if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) {
+            LOGGER.warn("[BetterGamba] Spin cancelled — coins removed during spin.");
+            blockEntity.spinning = false;
+            blockEntity.setChanged();
+            return;
+        }
+
+        // Consume coins immediately before delivering reward
+        blockEntity.coinInventory.extractItem(COIN_SLOT, coinCost, false);
 
         // Timer has reached zero — now resolve the spin and deliver the reward
         RewardPool pool = RewardPool.fromConfig(BetterGambaConfig.INSTANCE);
@@ -124,9 +149,14 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
         blockEntity.deliverReward(result, pos, level);
 
+        level.playSound(null, pos, ModSounds.REWARD_DROP.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+
         if (BetterGambaConfig.INSTANCE.logSpinEvents.get()) {
             LOGGER.info("[BetterGamba] Spin at {} — Tier: {}, Item: {}", pos, result.tierName(), result.itemEntry().registryId());
         }
+
+        int colour = SpinResultPacket.colourForTier(result.tierName());
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(result.tierName(), colour));
 
         // Spin is complete
         blockEntity.spinning = false;
@@ -144,8 +174,6 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         if (belowHandler == null) {
             belowHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.below(), Direction.UP);
         }
-
-        LOGGER.info("[BetterGamba] drainRewardOutput: belowHandler={}, rewardStack={}", belowHandler, reward);
 
         if (belowHandler != null) {
             ItemStack remainder = ItemHandlerHelper.insertItemStacked(belowHandler, reward.copy(), false);
@@ -207,15 +235,19 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         int coinCost = BetterGambaConfig.INSTANCE.coinCostPerSpin.get();
         ItemStack coinsInSlot = coinInventory.getStackInSlot(COIN_SLOT);
 
-        if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) return;
-
-        coinInventory.extractItem(COIN_SLOT, coinCost, false);
+        if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) {
+            return;
+        }
 
         // Set timer HERE so the spin waits before resolving
         int spinMs = BetterGambaConfig.INSTANCE.spinDurationMs.get();
         spinTicksRemaining = Math.max(1, spinMs / 50);
 
         spinning = true;
+        if (level != null) {
+            level.playSound(null, worldPosition, ModSounds.COIN_INSERT.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.playSound(null, worldPosition, ModSounds.SPIN_START.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
         setChanged();
     }
 
@@ -240,7 +272,7 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
      * Resolves the registry ID. If the item does not exist, returns ItemStack.EMPTY
      * and logs a warning (ConfigValidator should have caught this at server start).
      */
-    private ItemStack buildItemStack(@UnknownNullability ItemEntry entry) {
+    private ItemStack buildItemStack(@NotNull ItemEntry entry) {
         ResourceLocation loc = ResourceLocation.tryParse(entry.registryId());
         if (loc == null || !BuiltInRegistries.ITEM.containsKey(loc)) {
             LOGGER.warn("[BetterGamba] Cannot deliver reward: unknown item '{}'", entry.registryId());
@@ -248,9 +280,22 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         }
         var item = BuiltInRegistries.ITEM.get(loc);
         var stack = new ItemStack(item);
-        // NBT application will blockEntity added in Phase 5 when NBT parsing is implemented
+        entry.nbtString().ifPresent(nbtStr -> {
+            try {
+                CompoundTag tag = TagParser.parseTag(nbtStr);
+                if (tag.contains("Count")) {
+                    stack.setCount(tag.getByte("Count"));
+                }
+                if (!tag.isEmpty()) {
+                    stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag)).build());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("[BetterGamba] Failed to parse NBT for '{}': {}", entry.registryId(), e.getMessage());
+            }
+        });
         return stack;
     }
+
 
     /**
      * Delivers the reward item — either into a bottom hopper or as a world drop.

@@ -37,8 +37,8 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
     public LotteryMachineMenu(int containerId, @NotNull Inventory playerInventory, @NotNull FriendlyByteBuf extraData) {
         super(ModMenuTypes.LOTTERY_MACHINE_MENU.get(), containerId);
         BlockPos position = extraData.readBlockPos();
-        BlockEntity be = playerInventory.player.level().getBlockEntity(position);
-        if (be instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
+        BlockEntity blockEntity = playerInventory.player.level().getBlockEntity(position);
+        if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
             this.blockEntity = lotteryMachineBlockEntity;
         } else {
             throw new IllegalStateException("No LotteryMachineBlockEntity at " + position);
@@ -52,7 +52,7 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
      * when the delegated constructor itself calls a static method.
      */
     private void addSlots(Inventory playerInventory) {
-        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 80, 35));
+        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 152, 120));
 
         // Player hotbar
         for (int col = 0; col < 9; col++) {

@@ -20,14 +20,21 @@ import org.jetbrains.annotations.NotNull;
  * and the spin animation timer.
  */
 public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachineMenu> {
-    // Placeholder texture — replace in Phase 5 with final GUI art.
-    // File goes in: assets/bettergamba/textures/gui/lottery_machine.png
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "textures/gui/lottery_machine.png");
+    private String lastTierName = "";
+    private int lastTierColour = 0xFFFFFFFF;
+    private int tierDisplayTicks = 0;
 
     public LotteryMachineScreen(LotteryMachineMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;  // standard GUI width
         this.imageHeight = 166;  // standard GUI height
+    }
+
+    public void onSpinResult(String tierName, int colour) {
+        this.lastTierName = tierName;
+        this.lastTierColour = colour;
+        this.tierDisplayTicks = 60;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
         int y = (height - imageHeight) / 2;
 
         // Spin button — centred below the coin slot
-        addRenderableWidget(Button.builder(net.minecraft.network.chat.Component.literal("Spin"), btn -> PacketDistributor.sendToServer(new SpinRequestPacket(menu.getBlockPos()))).bounds(x + 63, y + 55, 50, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Spin"), btn -> PacketDistributor.sendToServer(new SpinRequestPacket(menu.getBlockPos()))).bounds(x + 115, y + 119, 34, 18).build());
     }
 
     @Override
@@ -46,12 +53,20 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
         // Replace with: graphics.blit(TEXTURE, ...) in Phase 5.
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
-        graphics.fill(x, y, x + imageWidth, y + imageHeight, 0xFF_C6C6C6);
+        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
     }
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
+
+        if (tierDisplayTicks > 0) {
+            tierDisplayTicks--;
+            int x = (width - imageWidth) / 2;
+            int y = (height - imageHeight) / 2;
+            // Draw tier name centered
+            graphics.drawCenteredString(font, lastTierName, x + imageWidth / 2, y + 80, lastTierColour);
+        }
     }
 }

@@ -171,9 +171,9 @@ public class LotteryMachineBlock extends BaseEntityBlock {
         boolean isPowered = level.hasNeighborSignal(pos);
         if (!isPowered) return;
 
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof LotteryMachineBlockEntity lmbe) {
-            lmbe.requestSpin();
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
+            lotteryMachineBlockEntity.requestSpin();
         }
     }
 }
