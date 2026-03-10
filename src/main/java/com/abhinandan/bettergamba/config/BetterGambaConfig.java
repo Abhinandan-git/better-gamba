@@ -35,7 +35,7 @@ public class BetterGambaConfig {
     public final ModConfigSpec.IntValue coinCostPerSpin;
 
     /**
-     * Spin timer duration in milliseconds. Default: 1500 (1.5 seconds).
+     * Spin timer duration in milliseconds. Default: 3000 (3 seconds).
      */
     public final ModConfigSpec.IntValue spinDurationMs;
 
@@ -67,7 +67,7 @@ public class BetterGambaConfig {
     private BetterGambaConfig(ModConfigSpec.@NotNull Builder builder) {
         builder.comment("Better Gamba - Global Configuration").push("general");
         coinCostPerSpin = builder.comment("Number of Celestia Coins consumed per spin. Minimum: 1.").defineInRange("coinCostPerSpin", 1, 1, 64);
-        spinDurationMs = builder.comment("Spin animation duration in milliseconds (1000-3000).").defineInRange("spinDurationMs", 1500, 1000, 3000);
+        spinDurationMs = builder.comment("Spin animation duration in milliseconds (1000-3000).").defineInRange("spinDurationMs", 3000, 1000, 5000);
         logSpinEvents = builder.comment("Log spin outcomes (player, position, tier, item) at INFO level.").define("logSpinEvents", true);
         builder.pop();
 

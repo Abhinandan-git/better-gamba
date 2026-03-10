@@ -245,7 +245,6 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
         spinning = true;
         if (level != null) {
-            level.playSound(null, worldPosition, ModSounds.COIN_INSERT.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
             level.playSound(null, worldPosition, ModSounds.SPIN_START.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
         }
         setChanged();

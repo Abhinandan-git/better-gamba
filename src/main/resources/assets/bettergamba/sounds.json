@@ -1,12 +1,4 @@
 {
-  "coin_insert": {
-    "sounds": [
-      {
-        "name": "bettergamba:coin_insert",
-        "volume": 0.8
-      }
-    ]
-  },
   "spin_start": {
     "sounds": [
       {

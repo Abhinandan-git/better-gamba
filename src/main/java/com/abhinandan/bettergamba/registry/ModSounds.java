@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ModSounds {
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, BetterGamba.MOD_ID);
-    public static final DeferredHolder<SoundEvent, SoundEvent> COIN_INSERT = register("coin_insert");
     public static final DeferredHolder<SoundEvent, SoundEvent> SPIN_START = register("spin_start");
     public static final DeferredHolder<SoundEvent, SoundEvent> REWARD_DROP = register("reward_drop");
 
