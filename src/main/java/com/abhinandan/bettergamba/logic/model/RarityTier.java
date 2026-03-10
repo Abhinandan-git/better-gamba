@@ -8,15 +8,15 @@ import java.util.List;
  * <p>Pure Java record — no Minecraft imports.
  *
  * @param name   Display name, e.g. "Common", "Omega"
- * @param weight Relative probability weight. Must blockEntity >= 0.
- *               A weight of 0 means this tier can never blockEntity selected.
- * @param items  List of item entries for this tier. May blockEntity empty.
+ * @param weight Relative probability weight. Must be >= 0.
+ *               A weight of 0 means this tier can never be selected.
+ * @param items  List of item entries for this tier. May be empty.
  *               An empty list means this tier is skipped even if selected.
  */
 public record RarityTier(String name, int weight, List<ItemEntry> items) {
     public RarityTier {
         if (weight < 0) {
-            throw new IllegalArgumentException("Rarity tier weight must blockEntity >= 0, got: " + weight);
+            throw new IllegalArgumentException("Rarity tier weight must be >= 0, got: " + weight);
         }
 
         items = List.copyOf(items);

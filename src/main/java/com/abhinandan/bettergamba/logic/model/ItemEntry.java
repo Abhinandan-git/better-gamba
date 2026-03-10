@@ -26,7 +26,7 @@ public record ItemEntry(String registryId, Optional<String> nbtString) {
      */
     public static ItemEntry parse(String raw) {
         if (raw == null || raw.isBlank()) {
-            throw new IllegalArgumentException("ItemEntry raw string must not blockEntity blank");
+            throw new IllegalArgumentException("ItemEntry raw string must not be blank");
         }
 
         int pipeIndex = raw.indexOf('|');

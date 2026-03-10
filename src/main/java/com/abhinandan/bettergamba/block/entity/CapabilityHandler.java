@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Registers IItemHandler capabilities for Better Gamba block entities.
  *
- * <p>Must blockEntity subscribed on the MOD event bus (not the NeoForge event bus).
+ * <p>Must be subscribed on the MOD event bus (not the NeoForge event bus).
  * Called once during mod loading. Defines which sides of the Lottery Machine
  * expose item handler access to hoppers and other automation.
  */

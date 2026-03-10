@@ -3,8 +3,10 @@ package com.abhinandan.bettergamba;
 import com.abhinandan.bettergamba.block.entity.CapabilityHandler;
 import com.abhinandan.bettergamba.config.BetterGambaConfig;
 import com.abhinandan.bettergamba.network.SpinRequestPacket;
-import com.abhinandan.bettergamba.network.SpinResultPacket;
-import com.abhinandan.bettergamba.registry.*;
+import com.abhinandan.bettergamba.registry.ModBlockEntities;
+import com.abhinandan.bettergamba.registry.ModBlocks;
+import com.abhinandan.bettergamba.registry.ModItems;
+import com.abhinandan.bettergamba.registry.ModMenuTypes;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -31,7 +33,6 @@ public class BetterGamba {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModMenuTypes.register(modEventBus);
-        ModSounds.register(modEventBus);
         modEventBus.addListener(CapabilityHandler::register);
         modEventBus.addListener(BetterGamba::registerPackets);
     }
@@ -39,6 +40,5 @@ public class BetterGamba {
     private static void registerPackets(@NotNull RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToServer(SpinRequestPacket.TYPE, SpinRequestPacket.STREAM_CODEC, SpinRequestPacket::handle);
-        registrar.playToClient(SpinResultPacket.TYPE, SpinResultPacket.STREAM_CODEC, SpinResultPacket::handle);
     }
 }

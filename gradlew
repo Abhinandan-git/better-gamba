@@ -66,7 +66,7 @@
 
 # Attempt to set APP_HOME
 
-# Resolve links: $0 may blockEntity a link
+# Resolve links: $0 may be a link
 app_path=$0
 
 # Need this for daisy-chained symlinks.
@@ -102,7 +102,7 @@ die () {
     exit 1
 } >&2
 
-# OS specific support (must blockEntity 'true' or 'false').
+# OS specific support (must be 'true' or 'false').
 cygwin=false
 msys=false
 darwin=false
@@ -135,7 +135,7 @@ else
     JAVACMD=java
     if ! command -v java >/dev/null 2>&1
     then
-        die "ERROR: JAVA_HOME is not set and no 'java' command could blockEntity found in your PATH.
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 
 Please set the JAVA_HOME variable in your environment to match the
 location of your Java installation."
@@ -206,8 +206,8 @@ DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 
 # Collect all arguments for the java command:
 #   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
-#     and any embedded shellness will blockEntity escaped.
-#   * For example: A user cannot expect ${Hostname} to blockEntity expanded, as it is an environment variable and will blockEntity
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
 #     treated as '${Hostname}' itself on the command line.
 
 set -- \
@@ -233,7 +233,7 @@ fi
 #
 # but POSIX shell has neither arrays nor command substitution, so instead we
 # post-process each arg (as a line of input to sed) to backslash-escape any
-# character that might blockEntity a shell metacharacter, then use eval to reverse
+# character that might be a shell metacharacter, then use eval to reverse
 # that process (while maintaining the separation between arguments), and wrap
 # the whole thing up as a single "set" statement.
 #
