@@ -39,14 +39,14 @@ public class ConfigValidator {
 
     private static void validateTier(String tierName, @NotNull List<? extends String> items) {
         if (items.isEmpty()) {
-            LOGGER.warning("[BetterGamba] Tier '{}' has no items configured. " + tierName + "This tier will never be selected during spin resolution.");
+            LOGGER.warning("[BetterGamba] Tier '{}' has no items configured. " + tierName + "This tier will never blockEntity selected during spin resolution.");
             return;
         }
         for (String entry : items) {
             String id = entry.contains("|") ? entry.substring(0, entry.indexOf('|')) : entry;
             ResourceLocation loc = ResourceLocation.tryParse(id);
             if (loc == null || !BuiltInRegistries.ITEM.containsKey(loc)) {
-                LOGGER.warning("[BetterGamba] Tier '{}': unknown item '{}'. " + tierName + id + "It will be skipped during spin resolution.");
+                LOGGER.warning("[BetterGamba] Tier '{}': unknown item '{}'. " + tierName + id + "It will blockEntity skipped during spin resolution.");
             }
         }
     }

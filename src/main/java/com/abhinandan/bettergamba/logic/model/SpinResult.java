@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param tierName  The name of the winning rarity tier, e.g. "Omega"
  * @param itemEntry The selected item entry from that tier
- * @param success   False if spin could not be resolved (all tiers misconfigured)
+ * @param success   False if spin could not blockEntity resolved (all tiers misconfigured)
  */
 public record SpinResult(String tierName, ItemEntry itemEntry, boolean success) {
     /**
