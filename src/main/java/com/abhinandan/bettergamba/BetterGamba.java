@@ -1,20 +1,18 @@
 package com.abhinandan.bettergamba;
 
 import com.abhinandan.bettergamba.block.entity.CapabilityHandler;
+import com.abhinandan.bettergamba.client.ClientSetup;
 import com.abhinandan.bettergamba.config.BetterGambaConfig;
 import com.abhinandan.bettergamba.config.ConfigValidator;
 import com.abhinandan.bettergamba.network.SpinRequestPacket;
 import com.abhinandan.bettergamba.network.SpinResultPacket;
 import com.abhinandan.bettergamba.network.SpinStartPacket;
 import com.abhinandan.bettergamba.registry.*;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -34,9 +32,6 @@ public class BetterGamba {
     public static final String MOD_ID = "bettergamba";
 
     public BetterGamba(IEventBus modEventBus, @NotNull ModContainer modContainer) {
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            modContainer.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(modContainer, parent));
-        }
         modContainer.registerConfig(ModConfig.Type.COMMON, BetterGambaConfig.SPEC);
 
         ModItems.register(modEventBus);
@@ -46,8 +41,12 @@ public class BetterGamba {
         ModSounds.register(modEventBus);
         modEventBus.addListener(CapabilityHandler::register);
         modEventBus.addListener(BetterGamba::registerPackets);
-
         NeoForge.EVENT_BUS.addListener(BetterGamba::onDatapackSync);
+
+        // Client-only registration — class is never loaded on server or test dist
+        if (FMLEnvironment.dist.isClient()) {
+            ClientSetup.registerConfigScreen(modContainer);
+        }
     }
 
     private static void registerPackets(@NotNull RegisterPayloadHandlersEvent event) {
@@ -58,7 +57,6 @@ public class BetterGamba {
     }
 
     private static void onDatapackSync(OnDatapackSyncEvent event) {
-        // Fires on /reload and on player join — re-validate config each time
         try {
             ConfigValidator.validate(BetterGambaConfig.INSTANCE);
             LogManager.getLogger(MOD_ID).info("[BetterGamba] Config re-validated after reload.");
