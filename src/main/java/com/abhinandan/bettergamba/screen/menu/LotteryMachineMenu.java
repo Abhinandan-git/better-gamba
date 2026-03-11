@@ -52,22 +52,12 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
      * when the delegated constructor itself calls a static method.
      */
     private void addSlots(Inventory playerInventory) {
-        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 152, 120));
+        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 138, 201));
 
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
+            addSlot(new Slot(playerInventory, col, 48 + col * 18, 223));
         }
-    }
-
-    private LotteryMachineBlockEntity getBlockEntity(@NotNull Inventory playerInventory, @NotNull FriendlyByteBuf buffer) {
-        var position = buffer.readBlockPos();
-        var blockEntity = playerInventory.player.level().getBlockEntity(position);
-
-        if (blockEntity instanceof LotteryMachineBlockEntity lotteryMachineBlockEntity) {
-            return lotteryMachineBlockEntity;
-        }
-        throw new IllegalStateException("No LotteryMachineBlockEntity at " + position);
     }
 
     @Override
