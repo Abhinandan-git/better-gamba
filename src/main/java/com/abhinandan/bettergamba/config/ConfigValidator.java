@@ -1,6 +1,7 @@
 package com.abhinandan.bettergamba.config;
 
 import com.abhinandan.bettergamba.BetterGamba;
+import com.abhinandan.bettergamba.logic.model.ItemEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -52,11 +53,16 @@ public class ConfigValidator {
             LOGGER.warn("[BetterGamba] Tier '{}' has no items configured. " + "This tier will never be selected during spin resolution.", tierName);
             return;
         }
-        for (String entry : items) {
-            String id = entry.contains("|") ? entry.substring(0, entry.indexOf('|')) : entry;
-            ResourceLocation loc = ResourceLocation.tryParse(id);
-            if (loc == null || !BuiltInRegistries.ITEM.containsKey(loc)) {
-                LOGGER.warn("[BetterGamba] Tier '{}': unknown item '{}'. " + "It will be skipped during spin resolution.", tierName, id);
+
+        for (String raw : items) {
+            try {
+                ItemEntry entry = ItemEntry.parse(raw);
+                ResourceLocation loc = ResourceLocation.tryParse(entry.registryId());
+                if (loc == null || !BuiltInRegistries.ITEM.containsKey(loc)) {
+                    LOGGER.warn("[BetterGamba] Tier '{}': unknown item '{}'. " + "It will be skipped during spin resolution.", tierName, entry.registryId());
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("[BetterGamba] Tier '{}': failed to parse entry '{}': {}", tierName, raw, e.getMessage());
             }
         }
     }

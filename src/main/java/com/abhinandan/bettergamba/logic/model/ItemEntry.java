@@ -1,41 +1,55 @@
 package com.abhinandan.bettergamba.logic.model;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Optional;
 
 /**
  * A single item entry in a rarity tier's item pool.
  *
- * <p>Parsed from a TOML string of the form:
- * "namespace:path"            — plain item, no NBT
- * "namespace:path|{nbt}"      — item with optional NBT tag string
- *
- * <p>This is a pure Java record — no Minecraft imports.
- * The BlockEntity converts this to an ItemStack when delivering a reward.
+ * <p>Format: "namespace:path" or "namespace:path|quantity" or
+ * "namespace:path{nbt}|quantity"
  *
  * @param registryId The full registry ID, e.g. "minecraft:diamond"
- * @param nbtString  Optional raw NBT string, e.g. "{Count:2b}"
+ * @param quantity   Stack size 1–64. Defaults to 1.
+ * @param nbtString  Optional raw NBT string
  */
-public record ItemEntry(String registryId, Optional<String> nbtString) {
-    /**
-     * Parses a raw TOML entry string into an ItemEntry.
-     *
-     * @param raw The raw string from TOML, e.g. "minecraft:diamond" or
-     *            "minecraft:diamond|{Count:2b}"
-     * @return Parsed ItemEntry
-     * @throws IllegalArgumentException if the format is invalid
-     */
-    public static ItemEntry parse(String raw) {
+public record ItemEntry(String registryId, int quantity, Optional<String> nbtString) {
+    @Contract("null -> fail")
+    public static @NotNull ItemEntry parse(String raw) {
         if (raw == null || raw.isBlank()) {
-            throw new IllegalArgumentException("ItemEntry raw string must not blockEntity blank");
+            throw new IllegalArgumentException("ItemEntry raw string must not be blank");
         }
 
-        int pipeIndex = raw.indexOf('|');
-        if (pipeIndex == -1) {
-            return new ItemEntry(raw.trim(), Optional.empty());
+        String id = raw.trim();
+        int qty = 1;
+        Optional<String> nbt = Optional.empty();
+
+        // Extract NBT — everything from first { to last }
+        if (id.contains("{")) {
+            int nbtStart = id.indexOf('{');
+            int nbtEnd = id.lastIndexOf('}');
+            if (nbtStart >= 0 && nbtEnd > nbtStart) {
+                nbt = Optional.of(id.substring(nbtStart, nbtEnd + 1));
+                id = id.substring(0, nbtStart) + id.substring(nbtEnd + 1);
+            }
         }
 
-        String id = raw.substring(0, pipeIndex).trim();
-        String nbt = raw.substring(pipeIndex + 1).trim();
-        return new ItemEntry(id, nbt.isEmpty() ? Optional.empty() : Optional.of(nbt));
+        // Extract quantity after pipe
+        if (id.contains("|")) {
+            String[] parts = id.split("\\|", 2);
+            id = parts[0].trim();
+            try {
+                qty = Integer.parseInt(parts[1].trim());
+                qty = Math.max(1, Math.min(qty, 64));
+            } catch (NumberFormatException e) {
+                qty = 1;
+            }
+        } else {
+            id = id.trim();
+        }
+
+        return new ItemEntry(id, qty, nbt);
     }
 }
