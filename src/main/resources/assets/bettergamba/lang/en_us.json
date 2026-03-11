@@ -1,5 +1,21 @@
 {
   "item.bettergamba.celestia_coin": "Celestia Coin",
   "block.bettergamba.lottery_machine": "Lottery Machine",
-  "jei.bettergamba.lottery_machine": "Lottery Machine"
+  "jei.bettergamba.lottery_machine": "Lottery Machine",
+  "bettergamba.configuration.general": "General Settings",
+  "bettergamba.configuration.spinDurationMs": "Spin Duration (ms)",
+  "bettergamba.configuration.coinCostPerSpin": "Coin Cost Per Spin",
+  "bettergamba.configuration.logSpinEvents": "Log Spin Events",
+  "bettergamba.configuration.common": "Common Tier",
+  "bettergamba.configuration.uncommon": "Uncommon Tier",
+  "bettergamba.configuration.rare": "Rare Tier",
+  "bettergamba.configuration.epic": "Epic Tier",
+  "bettergamba.configuration.omega": "Omega Tier",
+  "bettergamba.configuration.weight": "Weight",
+  "bettergamba.configuration.items": "Rewards",
+  "bettergamba.configuration.spinDurationMs.tooltip": "How long the wheel spins before landing, in milliseconds.",
+  "bettergamba.configuration.coinCostPerSpin.tooltip": "Number of Celestia Coins consumed per spin.",
+  "bettergamba.configuration.logSpinEvents.tooltip": "Log each spin result to the server console.",
+  "bettergamba.configuration.common.weight.tooltip": "Relative probability weight for Common tier. Set to 0 to disable.",
+  "bettergamba.configuration.common.items.tooltip": "Item list. Format: \"namespace:path\" or \"namespace:path{nbt}\""
 }

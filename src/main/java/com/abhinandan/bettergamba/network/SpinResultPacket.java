@@ -43,11 +43,11 @@ public record SpinResultPacket(BlockPos pos, String tierName, int tierColor) imp
     @Contract(pure = true)
     public static int colourForTier(@NotNull String tierName) {
         return switch (tierName) {
-            case "Common" -> 0xFF607D8B;
-            case "Uncommon" -> 0xFF2E7D32;
-            case "Rare" -> 0xFF1565C0;
-            case "Epic" -> 0xFF6A1B9A;
-            case "Omega" -> 0xFFB71C1C;
+            case "Common" -> 0xFFB6B1B1;
+            case "Uncommon" -> 0xFF44C0EA;
+            case "Rare" -> 0xFFEFEF49;
+            case "Epic" -> 0xFFD558EF;
+            case "Omega" -> 0xFF44EF39;
             default -> 0xFFFFFFFF;
         };
     }

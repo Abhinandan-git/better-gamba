@@ -52,11 +52,11 @@ public class LotteryMachineMenu extends AbstractContainerMenu {
      * when the delegated constructor itself calls a static method.
      */
     private void addSlots(Inventory playerInventory) {
-        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 192, 199));
+        addSlot(new SlotItemHandler(blockEntity.coinInventory, COIN_SLOT_INDEX, 138, 201));
 
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInventory, col, 48 + col * 18, 221));
+            addSlot(new Slot(playerInventory, col, 48 + col * 18, 223));
         }
     }
 

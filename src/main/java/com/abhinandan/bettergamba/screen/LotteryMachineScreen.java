@@ -23,15 +23,19 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
     /**
      * Move the entire wheel (texture + highlight) left/right. Positive = right.
      */
-    private static final int WHEEL_OFFSET_X = -50;
+    private static final int WHEEL_OFFSET_X = 0;
     /**
      * Move the entire wheel (texture + highlight) up/down. Positive = down.
      */
-    private static final int WHEEL_OFFSET_Y = -20;
+    private static final int WHEEL_OFFSET_Y = -34;
     /**
      * Wheel radius in pixels.
      */
-    private static final int WHEEL_RADIUS = 96;
+    private static final int WHEEL_RADIUS = 97;
+    /**
+     * Radius of the dead zone at the wheel center — no highlight drawn here.
+     */
+    private static final int WHEEL_INNER_RADIUS = 4;
     /**
      * Display size of the wheel on screen — independent of texture file size.
      */
@@ -143,7 +147,7 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
 
-        spinButton = Button.builder(Component.literal("Spin"), btn -> PacketDistributor.sendToServer(new SpinRequestPacket(menu.getBlockPos()))).bounds(x + 155, y + 198, 34, 18).build();
+        spinButton = Button.builder(Component.literal("Spin"), btn -> PacketDistributor.sendToServer(new SpinRequestPacket(menu.getBlockPos()))).bounds(x + 101, y + 200, 34, 18).build();
         addRenderableWidget(spinButton);
     }
 
@@ -261,6 +265,9 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
 
             for (int py = cy - halfH; py <= cy + halfH; py++) {
                 int dy = py - cy;
+
+                if (dx * dx + dy * dy < WHEEL_INNER_RADIUS * WHEEL_INNER_RADIUS) continue;
+
                 float angle = (float) Math.atan2(dy, dx);
 
                 // Find which section this pixel belongs to
@@ -314,9 +321,15 @@ public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachine
 
         if (highlightAlpha > 0 && !lastTierName.isEmpty()) {
             int nameColour = (highlightAlpha << 24) | (lastTierColour & 0x00FFFFFF);
-            int x = (width - imageWidth) / 2;
-            int y = (height - imageHeight) / 2;
-            graphics.drawCenteredString(font, lastTierName, x + imageWidth / 2, y + imageHeight - 20, nameColour);
+            int x = width / 2 + WHEEL_OFFSET_X;
+            int y = height / 2 + WHEEL_OFFSET_Y;
+            float scale = 1.5f; // adjust this — 1.0 = normal, 2.0 = double size
+
+            graphics.pose().pushPose();
+            graphics.pose().translate(x, y, 0);
+            graphics.pose().scale(scale, scale, 1f);
+            graphics.drawCenteredString(font, lastTierName, 0, 0, nameColour);
+            graphics.pose().popPose();
         }
     }
 

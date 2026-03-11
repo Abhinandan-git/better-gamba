@@ -7,10 +7,14 @@ import com.abhinandan.bettergamba.network.SpinRequestPacket;
 import com.abhinandan.bettergamba.network.SpinResultPacket;
 import com.abhinandan.bettergamba.network.SpinStartPacket;
 import com.abhinandan.bettergamba.registry.*;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -30,6 +34,9 @@ public class BetterGamba {
     public static final String MOD_ID = "bettergamba";
 
     public BetterGamba(IEventBus modEventBus, @NotNull ModContainer modContainer) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modContainer.registerExtensionPoint(IConfigScreenFactory.class, (mc, parent) -> new ConfigurationScreen(modContainer, parent));
+        }
         modContainer.registerConfig(ModConfig.Type.COMMON, BetterGambaConfig.SPEC);
 
         ModItems.register(modEventBus);
