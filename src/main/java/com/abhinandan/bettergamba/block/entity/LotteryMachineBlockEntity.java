@@ -7,6 +7,7 @@ import com.abhinandan.bettergamba.logic.model.ItemEntry;
 import com.abhinandan.bettergamba.logic.model.RewardPool;
 import com.abhinandan.bettergamba.logic.model.SpinResult;
 import com.abhinandan.bettergamba.network.SpinResultPacket;
+import com.abhinandan.bettergamba.network.SpinStartPacket;
 import com.abhinandan.bettergamba.registry.ModBlockEntities;
 import com.abhinandan.bettergamba.registry.ModSounds;
 import com.abhinandan.bettergamba.screen.menu.LotteryMachineMenu;
@@ -67,6 +68,12 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
     private static final String NBT_INVENTORY = "inventory";
     private static final String NBT_REWARD = "reward";
     private static final Logger LOGGER = LogManager.getLogger(BetterGamba.MOD_ID);
+    private static final int SPIN_COOLDOWN_TICKS = 30; // adjust 20-30 for 1-1.5 seconds
+    /**
+     * Ticks remaining before next spin is allowed. 30 ticks = 1.5 seconds.
+     */
+    private int cooldownTicksRemaining = 0;
+
     public final ItemStackHandler coinInventory = new ItemStackHandler(SLOT_COUNT) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -111,6 +118,11 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         // Drain reward output every tick regardless of spin state
         drainRewardOutput(level, pos, blockEntity);
 
+        // Count down cooldown independently of spin state
+        if (blockEntity.cooldownTicksRemaining > 0) {
+            blockEntity.cooldownTicksRemaining--;
+        }
+
         // No active spin — nothing to do
         if (!blockEntity.spinning) {
             return;
@@ -131,6 +143,8 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
             LOGGER.warn("[BetterGamba] Spin cancelled — coins removed during spin.");
             blockEntity.spinning = false;
             blockEntity.setChanged();
+            // Notify client to stop the animation
+            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(pos, "", 0x00000000));
             return;
         }
 
@@ -148,6 +162,9 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         }
 
         blockEntity.deliverReward(result, pos, level);
+        blockEntity.cooldownTicksRemaining = SPIN_COOLDOWN_TICKS; // ← start cooldown
+        blockEntity.spinning = false;
+        blockEntity.setChanged();
 
         level.playSound(null, pos, ModSounds.REWARD_DROP.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
 
@@ -156,7 +173,7 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
         }
 
         int colour = SpinResultPacket.colourForTier(result.tierName());
-        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(result.tierName(), colour));
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(pos, result.tierName(), colour));
 
         // Spin is complete
         blockEntity.spinning = false;
@@ -228,25 +245,26 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
      * should blockEntity visually disabled on the client during this time (Phase 5).
      */
     public void requestSpin() {
-        if (spinning) {
-            return;
-        }
+        if (spinning) return;
+        if (cooldownTicksRemaining > 0) return;
 
         int coinCost = BetterGambaConfig.INSTANCE.coinCostPerSpin.get();
         ItemStack coinsInSlot = coinInventory.getStackInSlot(COIN_SLOT);
+        if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) return;
 
-        if (coinsInSlot.isEmpty() || coinsInSlot.getCount() < coinCost) {
-            return;
-        }
-
-        // Set timer HERE so the spin waits before resolving
         int spinMs = BetterGambaConfig.INSTANCE.spinDurationMs.get();
         spinTicksRemaining = Math.max(1, spinMs / 50);
-
         spinning = true;
+
+        // Notify all watching clients so their animation starts immediately
+        if (level instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(worldPosition), new SpinStartPacket(worldPosition, spinMs));
+        }
+
         if (level != null) {
             level.playSound(null, worldPosition, ModSounds.SPIN_START.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
         }
+
         setChanged();
     }
 
