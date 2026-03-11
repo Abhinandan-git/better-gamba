@@ -169,10 +169,6 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
         int colour = SpinResultPacket.colourForTier(result.tierName());
         PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(pos, result.tierName(), colour));
-
-        // Spin is complete
-        blockEntity.spinning = false;
-        blockEntity.setChanged();
     }
 
     private static void drainRewardOutput(Level level, BlockPos pos, @NotNull LotteryMachineBlockEntity blockEntity) {
@@ -289,14 +285,13 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
             LOGGER.warn("[BetterGamba] Cannot deliver reward: unknown item '{}'", entry.registryId());
             return ItemStack.EMPTY;
         }
+
         var item = BuiltInRegistries.ITEM.get(loc);
-        var stack = new ItemStack(item);
+        var stack = new ItemStack(item, entry.quantity()); // quantity applied here directly
+
         entry.nbtString().ifPresent(nbtStr -> {
             try {
                 CompoundTag tag = TagParser.parseTag(nbtStr);
-                if (tag.contains("Count")) {
-                    stack.setCount(tag.getByte("Count"));
-                }
                 if (!tag.isEmpty()) {
                     stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag)).build());
                 }
@@ -304,9 +299,9 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
                 LOGGER.warn("[BetterGamba] Failed to parse NBT for '{}': {}", entry.registryId(), e.getMessage());
             }
         });
+
         return stack;
     }
-
 
     /**
      * Delivers the reward item — either into a bottom hopper or as a world drop.
