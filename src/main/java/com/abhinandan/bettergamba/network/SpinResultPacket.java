@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * Used to display the rarity color and tier name in the GUI.
  *
  * @param tierName  e.g. "Omega"
- * @param tierColor ARGB int — matches the 5 tier colors from Phase 1
+ * @param tierColor ARGB int
  */
 public record SpinResultPacket(BlockPos pos, String tierName, int tierColor) implements CustomPacketPayload {
 

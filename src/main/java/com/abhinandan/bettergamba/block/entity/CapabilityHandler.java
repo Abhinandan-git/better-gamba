@@ -23,7 +23,7 @@ public class CapabilityHandler {
      * Side logic (BLK-05, BLK-05b, OQ-03):
      * - LEFT side relative to block FACING  → coin INSERT only
      * - RIGHT side relative to block FACING → coin INSERT only
-     * - BOTTOM                              → coin EXTRACT only (reward output, Phase 4)
+     * - BOTTOM                              → coin EXTRACT only
      * - All other sides                     → null (no capability)
      */
     public static void register(@NotNull RegisterCapabilitiesEvent event) {
@@ -42,7 +42,6 @@ public class CapabilityHandler {
                 return new LotteryMachineCoinHandler(blockEntity, true, false);
             }
             if (direction == Direction.DOWN) {
-                // Hopper on bottom: extract rewards only (Phase 4 fills this)
                 return new LotteryMachineCoinHandler(blockEntity, false, true) {
                     @Override
                     public @NotNull ItemStack getStackInSlot(int slot) {

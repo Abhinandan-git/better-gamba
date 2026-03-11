@@ -51,7 +51,6 @@ import java.util.Random;
  *
  * <p>Holds a single-slot coin inventory (BLK-04, BLK-05).
  * NBT save/load ensures coins persist across chunk unloads and server restarts.
- * Thread-safe spin queue will blockEntity added in Phase 4 (ADR-03).
  */
 public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvider {
     /**
@@ -168,10 +167,6 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
         level.playSound(null, pos, ModSounds.REWARD_DROP.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
 
-        if (BetterGambaConfig.INSTANCE.logSpinEvents.get()) {
-            LOGGER.info("[BetterGamba] Spin at {} — Tier: {}, Item: {}", pos, result.tierName(), result.itemEntry().registryId());
-        }
-
         int colour = SpinResultPacket.colourForTier(result.tierName());
         PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(pos), new SpinResultPacket(pos, result.tierName(), colour));
 
@@ -241,8 +236,7 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
     /**
      * Called when any player clicks the Spin button.
-     * If a spin is already in progress, the request is ignored — the button
-     * should blockEntity visually disabled on the client during this time (Phase 5).
+     * If a spin is already in progress, the request is ignored.
      */
     public void requestSpin() {
         if (spinning) return;
