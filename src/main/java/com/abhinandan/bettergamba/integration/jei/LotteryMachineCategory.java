@@ -75,7 +75,7 @@ public class LotteryMachineCategory implements IRecipeCategory<LotteryMachineJei
     @Override
     public void draw(@NotNull LotteryMachineJeiRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
         // Optional: draw tier name as a label above the slots
-        guiGraphics.drawString(net.minecraft.client.Minecraft.getInstance().font, recipe.tierName(), 1, 1, 0xFF607D8B, // default colour — tier colour rendering can be added in Phase 6
+        guiGraphics.drawString(net.minecraft.client.Minecraft.getInstance().font, recipe.tierName(), 1, 1, 0xFF607D8B,
                 false);
     }
 }

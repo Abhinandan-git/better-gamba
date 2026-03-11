@@ -40,15 +40,11 @@ public class ConfigValidator {
      * @param cfg the live config instance to validate
      */
     public static void validate(@NotNull BetterGambaConfig cfg) {
-        LOGGER.info("[BetterGamba] Validating reward pool configuration...");
-
         validateTier("common", cfg.commonItems.get());
         validateTier("uncommon", cfg.uncommonItems.get());
         validateTier("rare", cfg.rareItems.get());
         validateTier("epic", cfg.epicItems.get());
         validateTier("omega", cfg.omegaItems.get());
-
-        LOGGER.info("[BetterGamba] Reward pool validation complete.");
     }
 
     private static void validateTier(String tierName, @NotNull List<? extends String> items) {

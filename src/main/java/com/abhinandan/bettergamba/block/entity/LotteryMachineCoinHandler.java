@@ -10,8 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * <p>Exposes the coin slot based on which side a hopper is connected to:
  * <ul>
  *   <li>LEFT / RIGHT (relative to block FACING): input only — hoppers may insert coins.
- *   <li>BOTTOM: output only — hoppers may extract reward items. (Reward output is
- *       managed in Phase 4; this handler allows extraction from the output buffer.)
+ *   <li>BOTTOM: output only — hoppers may extract reward items.
  *   <li>All other sides: returns an empty handler (no access).
  * </ul>
  *

@@ -113,7 +113,6 @@ public class LotteryMachineBlock extends BaseEntityBlock {
     @Override
     protected @NotNull RenderShape getRenderShape(@NotNull BlockState state) {
         // INVISIBLE defers rendering to a BlockEntityRenderer.
-        // Change to MODEL once a static JSON model is used (Phase 5).
         return RenderShape.MODEL;
     }
 

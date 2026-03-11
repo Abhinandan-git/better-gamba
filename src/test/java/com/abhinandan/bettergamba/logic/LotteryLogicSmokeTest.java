@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Smoke test — verifies the JUnit 5 + ModDevGradle test harness is wired correctly.
- * This test is intentionally trivial. Real tests are added in Phase 4.
  *
  * @see LotteryLogic
  */

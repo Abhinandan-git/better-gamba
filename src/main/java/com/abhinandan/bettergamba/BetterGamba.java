@@ -59,7 +59,6 @@ public class BetterGamba {
     private static void onDatapackSync(OnDatapackSyncEvent event) {
         try {
             ConfigValidator.validate(BetterGambaConfig.INSTANCE);
-            LogManager.getLogger(MOD_ID).info("[BetterGamba] Config re-validated after reload.");
         } catch (Exception e) {
             LogManager.getLogger(MOD_ID).error("[BetterGamba] Config validation failed after reload: {}", e.getMessage());
         }
