@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "bettergamba:lottery_machine"
+          "name": "bettergamba:gamba_wheel"
         }
       ],
       "rolls": 1.0

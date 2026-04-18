@@ -14,7 +14,7 @@ public class ModBlockEntities {
     public static void register(IEventBus modEventBus) {
         BLOCK_ENTITIES.register(modEventBus);
     }    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LotteryMachineBlockEntity>> LOTTERY_MACHINE_BLOCK_ENTITY =
-            BLOCK_ENTITIES.register("lottery_machine", () -> BlockEntityType.Builder.of(LotteryMachineBlockEntity::new, ModBlocks.LOTTERY_MACHINE.get()).build(null));
+            BLOCK_ENTITIES.register("gamba_wheel", () -> BlockEntityType.Builder.of(LotteryMachineBlockEntity::new, ModBlocks.LOTTERY_MACHINE.get()).build(null));
 
 
 }

@@ -16,10 +16,10 @@ public class ModBlocks {
 
     /**
      * The Lottery Machine block.
-     * Registry ID: bettergamba:lottery_machine
+     * Registry ID: bettergamba:gamba_wheel
      * Requires a corresponding BlockItem so players can hold and place it.
      */
-    public static final DeferredBlock<LotteryMachineBlock> LOTTERY_MACHINE = BLOCKS.register("lottery_machine", () -> new LotteryMachineBlock(
+    public static final DeferredBlock<LotteryMachineBlock> LOTTERY_MACHINE = BLOCKS.register("gamba_wheel", () -> new LotteryMachineBlock(
             BlockBehaviour.Properties.of().strength(3.5f, 6.0f).sound(SoundType.WOOD).noOcclusion()
     ));
 
@@ -27,7 +27,7 @@ public class ModBlocks {
      * BlockItem for the Lottery Machine — allows the block to exist in inventory.
      * KubeJS defines the crafting recipe; this just registers the item form.
      */
-    public static final DeferredHolder<Item, BlockItem> LOTTERY_MACHINE_ITEM = ModItems.ITEMS.register("lottery_machine", () -> new BlockItem(LOTTERY_MACHINE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> LOTTERY_MACHINE_ITEM = ModItems.ITEMS.register("gamba_wheel", () -> new BlockItem(LOTTERY_MACHINE.get(), new Item.Properties()));
 
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);

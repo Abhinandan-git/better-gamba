@@ -211,7 +211,7 @@ public class LotteryMachineBlockEntity extends BlockEntity implements MenuProvid
 
     @Override
     public @NotNull Component getDisplayName() {
-        return Component.translatable("block.bettergamba.lottery_machine");
+        return Component.translatable("block.bettergamba.gamba_wheel");
     }
 
     @Override

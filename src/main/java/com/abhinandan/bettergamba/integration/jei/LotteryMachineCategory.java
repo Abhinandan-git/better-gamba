@@ -23,8 +23,7 @@ import java.util.List;
  * Displays: coin input on the left, all possible rewards on the right.
  */
 public class LotteryMachineCategory implements IRecipeCategory<LotteryMachineJeiRecipe> {
-
-    public static final RecipeType<LotteryMachineJeiRecipe> TYPE = new RecipeType<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "lottery_machine"), LotteryMachineJeiRecipe.class);
+    public static final RecipeType<LotteryMachineJeiRecipe> TYPE = new RecipeType<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "gamba_wheel"), LotteryMachineJeiRecipe.class);
 
     private static final int WIDTH = 160;
     private static final int HEIGHT = 40;
@@ -42,7 +41,7 @@ public class LotteryMachineCategory implements IRecipeCategory<LotteryMachineJei
 
     @Override
     public @NotNull Component getTitle() {
-        return Component.translatable("jei.bettergamba.lottery_machine");
+        return Component.translatable("jei.bettergamba.gamba_wheel");
     }
 
     @Override

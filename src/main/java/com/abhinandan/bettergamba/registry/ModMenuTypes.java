@@ -14,7 +14,9 @@ public class ModMenuTypes {
 
     public static void register(IEventBus modEventBus) {
         MENU_TYPES.register(modEventBus);
-    }    public static final DeferredHolder<MenuType<?>, MenuType<LotteryMachineMenu>> LOTTERY_MACHINE_MENU = MENU_TYPES.register("lottery_machine", () -> IMenuTypeExtension.create(LotteryMachineMenu::new));
+    }
+
+    public static final DeferredHolder<MenuType<?>, MenuType<LotteryMachineMenu>> LOTTERY_MACHINE_MENU = MENU_TYPES.register("gamba_wheel", () -> IMenuTypeExtension.create(LotteryMachineMenu::new));
 
 
 }

@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class LotteryMachineScreen extends AbstractContainerScreen<LotteryMachineMenu> {
 
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "textures/gui/lottery_machine.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "textures/gui/gamba_wheel.png");
     private static final ResourceLocation WHEEL = ResourceLocation.fromNamespaceAndPath(BetterGamba.MOD_ID, "textures/gui/lottery_wheel.png");
 
     // ── Single control point for wheel position ───────────────────────────────

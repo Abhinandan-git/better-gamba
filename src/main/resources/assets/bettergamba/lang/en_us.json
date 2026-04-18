@@ -1,7 +1,7 @@
 {
   "item.bettergamba.celestia_coin": "Celestia Coin",
-  "block.bettergamba.lottery_machine": "Lottery Machine",
-  "jei.bettergamba.lottery_machine": "Lottery Machine",
+  "block.bettergamba.gamba_wheel": "Gambe Wheel",
+  "jei.bettergamba.gamba_wheel": "Gambe Wheel",
   "bettergamba.configuration.general": "General Settings",
   "bettergamba.configuration.spinDurationMs": "Spin Duration (ms)",
   "bettergamba.configuration.coinCostPerSpin": "Coin Cost Per Spin",
