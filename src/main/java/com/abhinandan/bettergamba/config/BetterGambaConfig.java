@@ -73,27 +73,27 @@ public class BetterGambaConfig {
 
         builder.comment("Reward Pool — Common tier").push("common");
         commonWeight = builder.comment("Relative weight. Higher = more frequent. Must blockEntity >= 0.").defineInRange("weight", 100, 0, Integer.MAX_VALUE);
-        commonItems = builder.comment("Item list. Format: \"namespace:path\" or \"namespace:path|{nbt}\"").defineListAllowEmpty("items", List.of("minecraft:bread", "minecraft:apple"), BetterGambaConfig::isValidItemEntry);
+        commonItems = builder.comment("Item list. Format: \"namespace:path\" or \"namespace:path|{nbt}\"").defineList("items", List.of("minecraft:bread", "minecraft:apple"), () -> "minecraft:bread", BetterGambaConfig::isValidItemEntry);
         builder.pop();
 
         builder.comment("Reward Pool — Uncommon tier").push("uncommon");
         uncommonWeight = builder.comment("Relative weight.").defineInRange("weight", 60, 0, Integer.MAX_VALUE);
-        uncommonItems = builder.comment("Item list.").defineListAllowEmpty("items", List.of("minecraft:gold_ingot"), BetterGambaConfig::isValidItemEntry);
+        uncommonItems = builder.comment("Item list.").defineList("items", List.of("minecraft:gold_ingot"), () -> "minecraft:gold_ingot", BetterGambaConfig::isValidItemEntry);
         builder.pop();
 
         builder.comment("Reward Pool — Rare tier").push("rare");
         rareWeight = builder.comment("Relative weight.").defineInRange("weight", 30, 0, Integer.MAX_VALUE);
-        rareItems = builder.comment("Item list.").defineListAllowEmpty("items", List.of("minecraft:diamond"), BetterGambaConfig::isValidItemEntry);
+        rareItems = builder.comment("Item list.").defineList("items", List.of("minecraft:diamond"), () -> "minecraft:diamond", BetterGambaConfig::isValidItemEntry);
         builder.pop();
 
         builder.comment("Reward Pool — Epic tier").push("epic");
         epicWeight = builder.comment("Relative weight.").defineInRange("weight", 10, 0, Integer.MAX_VALUE);
-        epicItems = builder.comment("Item list.").defineListAllowEmpty("items", List.of("minecraft:emerald"), BetterGambaConfig::isValidItemEntry);
+        epicItems = builder.comment("Item list.").defineList("items", List.of("minecraft:emerald"), () -> "minecraft:emerald", BetterGambaConfig::isValidItemEntry);
         builder.pop();
 
         builder.comment("Reward Pool — Omega tier").push("omega");
         omegaWeight = builder.comment("Relative weight.").defineInRange("weight", 1, 0, Integer.MAX_VALUE);
-        omegaItems = builder.comment("Item list.").defineListAllowEmpty("items", List.of("minecraft:nether_star"), BetterGambaConfig::isValidItemEntry);
+        omegaItems = builder.comment("Item list.").defineList("items", List.of("minecraft:nether_star"), () -> "minecraft:nether_star", BetterGambaConfig::isValidItemEntry);
         builder.pop();
     }
 
