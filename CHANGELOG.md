@@ -13,3 +13,19 @@
 - In-game config screen via Mods > Better Gamba > Config
 - /reload support — config changes apply without restart
 - Config validation at server start and on /reload
+
+---
+
+## [1.0.1] - Patch fix
+
+---
+
+## [1.0.2] - Patch fix
+
+---
+
+## [1.0.3] - Patch fix
+
+### Added
+
+- Support for adding list of items to config
