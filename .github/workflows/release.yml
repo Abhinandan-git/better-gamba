@@ -12,6 +12,7 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
+      - run: chmod +x ./gradlew
       - run: ./gradlew build
       - uses: softprops/action-gh-release@v2
         with:
