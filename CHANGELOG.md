@@ -29,3 +29,11 @@
 ### Added
 
 - Support for adding list of items to config
+
+---
+
+## [1.0.4] - Patch fix
+
+### Modified
+
+- Minor spell fix.
